@@ -7,8 +7,12 @@ THIS_DIR="$(mksh_setup dirname_of_bin "$0")"
 if [[ -z "$@" ]]; then
   action="watch"
 else
-  action=$1
-  shift
+  if [[ -s "$1" ]] ; then
+    action="json-to-www"
+  else
+    action=$1
+    shift
+  fi
 fi
 
 set -u -e -o pipefail
@@ -20,6 +24,13 @@ case $action in
 
   *)
     func_file="$THIS_DIR/bin/lib/${action}.sh"
+    if [[ -s "$func_file" ]]; then
+      source "$func_file"
+      "$action" "$@"
+      exit 0
+    fi
+
+    func_file="$THIS_DIR/bin/public/${action}/_.sh"
     if [[ -s "$func_file" ]]; then
       source "$func_file"
       "$action" "$@"
