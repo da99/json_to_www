@@ -2,7 +2,10 @@
 #
 #
 THE_ARGS="$@"
-THIS_DIR="$(mksh_setup dirname_of_bin "$0")"
+THIS_DIR="$(dirname "$(dirname "$0")")"
+PATH="$PATH:$THIS_DIR/../mksh_setup/bin"
+PATH="$PATH:$THIS_DIR/../lua_setup/bin"
+PATH="$PATH:$THIS_DIR/../sh_specs/bin"
 
 if [[ -z "$@" ]]; then
   action="watch"
@@ -23,6 +26,16 @@ case $action in
     ;;
 
   *)
+    if [[ "$action" == "luajit" && -e progs/luarocks ]]; then
+      eval $(progs/luarocks/bin/luarocks path --bin)
+    fi
+
+    FUNC_FILE="$(find -L "$THIS_DIR/progs" -type f -regextype posix-extended -regex ".+/s?bin/$action$")"
+    if [[ -f "$FUNC_FILE" ]]; then
+      "$FUNC_FILE" "$@"
+      exit 0
+    fi
+
     func_file="$THIS_DIR/bin/lib/${action}.sh"
     if [[ -s "$func_file" ]]; then
       source "$func_file"
