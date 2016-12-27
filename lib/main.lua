@@ -48,10 +48,14 @@ function compile (state, prog, pos)
     error("Invalid program: function with no name.")
 
   elseif CURRENT_TYPE == "string" and type(NEXT) == "table" then
+    local the_function = find_function(CURRENT, state)
+    if type(the_function) ~= "function" then
+      error("Function not found: " .. CURRENT)
+    end
     print("found a function call: " .. CURRENT);
     pos = pos + 1
 
-  elseif CURRENT_TYPE == "string" and type(NEXT) == "table" then
+  elseif CURRENT_TYPE == "string" then
     print("found a string: " .. CURRENT);
 
   else
@@ -62,6 +66,7 @@ function compile (state, prog, pos)
 end
 
 local FUNCS = {}
+local DYNA_FUNCS = {}
 
 FUNCS["title"] = function (state, prog, position)
   return state, prog, position;
@@ -71,9 +76,41 @@ FUNCS["div"] = function (state, prog, position)
   return state, prog, position;
 end
 
-function NEW_STATE ()
-  return({ STACK = {}, FUNCS = FUNCS });
+FUNCS["style"] = function (state, prog, pos)
+  state["STACK"][#state["STACK"] + 1] = "styles"
+  return state, prog, position;
 end
+
+DYNA_FUNCS["Create HTML"] = {
+  is = function (name, state, prog, pos)
+    local TAG          = name:match("([%a%d_]+)%.[%#%a%d_]+")
+    local TAG_FUNC     = find_function(TAG, state)
+    local CLASS_AND_ID = name:match("[%a%d_]+%.([%#%.%a%d_]+)")
+    return TAG ~= nil and type(TAG_FUNC) == "function" and type(CLASS_AND_ID) == "string";
+  end,
+
+  func = function ()
+  end
+}
+
+function NEW_STATE ()
+  return({ STACK = {}, FUNCS = FUNCS, DYNA_FUNCS = DYNA_FUNCS });
+end
+
+function find_function (name, state)
+  local FUNC = state["FUNCS"][name];
+  if FUNC ~= nil then
+    return FUNC;
+  end
+
+  if FUNC == nil and type(state["PARENT"]) == "table" then
+    return find_function(NAME, state["PARENT"]);
+  end
+
+  return nil;
+end
+
+
 
 main()
 

@@ -1,20 +1,21 @@
 [
-  5,
   "style", [
     "div", ["padding", ["5px"]],
     "div.p", ["padding", ["10px"]]
   ],
-  "on click", [
-  ],
+
   "title", ["Homepage"],
+
   "div.p", [
     "This is a div.",
     "on click", [
-      "inform", ["clicked div.p"]
+      "console log", ["clicked: ", "html full tag", []]
     ]
   ],
+
   "div", [
     "div.p", ["p2"],
-    "span.copyright", ["copyright(2020)"]
+    "span.copyright", ["copyright(2020)"],
+    "on click", [ "hide", [] ]
   ]
 ]

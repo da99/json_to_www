@@ -26,11 +26,11 @@ case $action in
     ;;
 
   *)
-    if [[ "$action" == "luajit" && -e progs/luarocks ]]; then
+    if [[ "$action" == "luajit" || -e progs/luarocks/bin/"$action" ]]; then
       eval $(progs/luarocks/bin/luarocks path --bin)
     fi
 
-    FUNC_FILE="$(find -L "$THIS_DIR/progs" -type f -regextype posix-extended -regex ".+/s?bin/$action$")"
+    FUNC_FILE="$(find -L "$THIS_DIR/progs" -type f -regextype posix-extended -regex ".+/(nginx|luarocks|luajit)/s?bin/$action$")"
     if [[ -f "$FUNC_FILE" ]]; then
       "$FUNC_FILE" "$@"
       exit 0
